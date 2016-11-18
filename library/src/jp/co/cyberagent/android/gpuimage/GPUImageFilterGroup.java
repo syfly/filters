@@ -17,6 +17,7 @@
 package jp.co.cyberagent.android.gpuimage;
 
 import android.opengl.GLES20;
+import jp.co.cyberagent.android.gpuimage.filters.GPUImageFilter;
 import jp.co.cyberagent.android.gpuimage.util.TextureRotationUtil;
 
 import java.nio.ByteBuffer;

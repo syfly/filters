@@ -25,7 +25,7 @@ import java.util.Date;
 
 import jp.co.cyberagent.android.gpuimage.GPUImage;
 import jp.co.cyberagent.android.gpuimage.GPUImage.OnPictureSavedListener;
-import jp.co.cyberagent.android.gpuimage.GPUImageFilter;
+import jp.co.cyberagent.android.gpuimage.filters.GPUImageFilter;
 import jp.co.cyberagent.android.gpuimage.sample.GPUImageFilterTools;
 import jp.co.cyberagent.android.gpuimage.sample.GPUImageFilterTools.FilterAdjuster;
 import jp.co.cyberagent.android.gpuimage.sample.GPUImageFilterTools.OnGpuImageFilterChosenListener;
@@ -170,7 +170,7 @@ public class ActivityCamera extends Activity implements OnSeekBarChangeListener,
                                     @Override
                                     public void onPictureSaved(final Uri
                                             uri) {
-                                        pictureFile.delete();
+                                        //pictureFile.delete();
                                         camera.startPreview();
                                         view.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
                                     }
@@ -187,7 +187,7 @@ public class ActivityCamera extends Activity implements OnSeekBarChangeListener,
         // using Environment.getExternalStorageState() before doing this.
 
         File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_PICTURES), "MyCameraApp");
+                Environment.DIRECTORY_PICTURES), "mediadump");
         // This location works best if you want the created images to be shared
         // between applications and persist after your app has been uninstalled.
 

@@ -20,6 +20,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import jp.co.cyberagent.android.gpuimage.*;
+import jp.co.cyberagent.android.gpuimage.filters.*;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;

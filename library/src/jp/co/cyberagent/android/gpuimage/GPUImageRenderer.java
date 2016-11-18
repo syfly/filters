@@ -27,7 +27,9 @@ import android.hardware.Camera.Size;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView.Renderer;
 import android.util.Log;
+import jp.co.cyberagent.android.gpuimage.filters.GPUImageFilter;
 import jp.co.cyberagent.android.gpuimage.util.TextureRotationUtil;
+import jp.co.cyberagent.android.gpuimage.util.VideoDump;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -75,6 +77,7 @@ public class GPUImageRenderer implements Renderer, PreviewCallback {
     private boolean mFlipHorizontal;
     private boolean mFlipVertical;
     private GPUImage.ScaleType mScaleType = GPUImage.ScaleType.CENTER_CROP;
+	private VideoDump mVideoDump;
 
     public GPUImageRenderer(final GPUImageFilter filter) {
         mFilter = filter;
@@ -88,6 +91,7 @@ public class GPUImageRenderer implements Renderer, PreviewCallback {
         mGLTextureBuffer = ByteBuffer.allocateDirect(TEXTURE_NO_ROTATION.length * 4)
                 .order(ByteOrder.nativeOrder())
                 .asFloatBuffer();
+        mVideoDump = new VideoDump();
         setRotation(Rotation.NORMAL, false, false);
     }
 
@@ -103,6 +107,9 @@ public class GPUImageRenderer implements Renderer, PreviewCallback {
         mOutputWidth = width;
         mOutputHeight = height;
         GLES20.glViewport(0, 0, width, height);
+        
+        mVideoDump.init(width, height);
+        
         GLES20.glUseProgram(mFilter.getProgram());
         mFilter.onOutputSizeChanged(width, height);
         synchronized (mSurfaceChangedWaiter) {
@@ -112,7 +119,7 @@ public class GPUImageRenderer implements Renderer, PreviewCallback {
 
     @Override
     public void onDrawFrame(final GL10 gl) {
-    	Log.d(TAG, "onDrawFrame mGLTextureId=" + mGLTextureId);
+    	//Log.d(TAG, "onDrawFrame mGLTextureId=" + mGLTextureId);
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
         synchronized (mRunOnDraw) {
             while (!mRunOnDraw.isEmpty()) {
@@ -122,7 +129,10 @@ public class GPUImageRenderer implements Renderer, PreviewCallback {
         mFilter.onDraw(mGLTextureId, mGLCubeBuffer, mGLTextureBuffer);
         if (mSurfaceTexture != null) {
             mSurfaceTexture.updateTexImage();
+            
+            mVideoDump.DumpToFile();
         }
+        
         
         Log.d(TAG, "onDrawFrame end mGLTextureId" + mGLTextureId);
     }

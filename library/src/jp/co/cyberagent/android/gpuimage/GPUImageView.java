@@ -24,6 +24,8 @@ import android.util.AttributeSet;
 
 import java.io.File;
 
+import jp.co.cyberagent.android.gpuimage.filters.GPUImageFilter;
+
 public class GPUImageView extends GLSurfaceView {
 
     private GPUImage mGPUImage;

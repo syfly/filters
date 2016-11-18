@@ -14,27 +14,17 @@
  * limitations under the License.
  */
 
-package jp.co.cyberagent.android.gpuimage;
+package jp.co.cyberagent.android.gpuimage.filters;
 
-import java.util.ArrayList;
-import java.util.List;
 
-import jp.co.cyberagent.android.gpuimage.filters.GPUImage3x3TextureSamplingFilter;
-import jp.co.cyberagent.android.gpuimage.filters.GPUImageFilter;
-import jp.co.cyberagent.android.gpuimage.filters.GPUImageGrayscaleFilter;
-
-/**
- * Applies sobel edge detection on the image.
- */
-public class GPUImageSobelEdgeDetection extends GPUImageFilterGroup {
-
-    public static final String SOBEL_EDGE_DETECTION = "" +
+public class GPUImageDirectionalSobelEdgeDetectionFilter extends GPUImage3x3TextureSamplingFilter {
+    public static final String DIRECTIONAL_SOBEL_EDGE_DETECTION_FRAGMENT_SHADER = "" +
             "precision mediump float;\n" + 
-            "\n" + 
+            "\n" +
             "varying vec2 textureCoordinate;\n" + 
             "varying vec2 leftTextureCoordinate;\n" + 
             "varying vec2 rightTextureCoordinate;\n" + 
-            "\n" + 
+            "\n" +
             "varying vec2 topTextureCoordinate;\n" + 
             "varying vec2 topLeftTextureCoordinate;\n" + 
             "varying vec2 topRightTextureCoordinate;\n" + 
@@ -55,26 +45,20 @@ public class GPUImageSobelEdgeDetection extends GPUImageFilterGroup {
             "    float rightIntensity = texture2D(inputImageTexture, rightTextureCoordinate).r;\n" + 
             "    float bottomIntensity = texture2D(inputImageTexture, bottomTextureCoordinate).r;\n" + 
             "    float topIntensity = texture2D(inputImageTexture, topTextureCoordinate).r;\n" + 
-            "    float h = -topLeftIntensity - 2.0 * topIntensity - topRightIntensity + bottomLeftIntensity + 2.0 * bottomIntensity + bottomRightIntensity;\n" + 
-            "    float v = -bottomLeftIntensity - 2.0 * leftIntensity - topLeftIntensity + bottomRightIntensity + 2.0 * rightIntensity + topRightIntensity;\n" + 
             "\n" + 
-            "    float mag = length(vec2(h, v));\n" + 
+            "    vec2 gradientDirection;\n" + 
+            "    gradientDirection.x = -bottomLeftIntensity - 2.0 * leftIntensity - topLeftIntensity + bottomRightIntensity + 2.0 * rightIntensity + topRightIntensity;\n" + 
+            "    gradientDirection.y = -topLeftIntensity - 2.0 * topIntensity - topRightIntensity + bottomLeftIntensity + 2.0 * bottomIntensity + bottomRightIntensity;\n" + 
             "\n" + 
-            "    gl_FragColor = vec4(vec3(mag), 1.0);\n" + 
+            "    float gradientMagnitude = length(gradientDirection);\n" + 
+            "    vec2 normalizedDirection = normalize(gradientDirection);\n" + 
+            "    normalizedDirection = sign(normalizedDirection) * floor(abs(normalizedDirection) + 0.617316); // Offset by 1-sin(pi/8) to set to 0 if near axis, 1 if away\n" + 
+            "    normalizedDirection = (normalizedDirection + 1.0) * 0.5; // Place -1.0 - 1.0 within 0 - 1.0\n" + 
+            "\n" + 
+            "    gl_FragColor = vec4(gradientMagnitude, normalizedDirection.x, normalizedDirection.y, 1.0);\n" + 
             "}";
 
-    public GPUImageSobelEdgeDetection() {
-        super(createFilters());
-    }
-
-    private static List<GPUImageFilter> createFilters() {
-        List<GPUImageFilter> filters = new ArrayList<GPUImageFilter>(2);
-        filters.add(new GPUImageGrayscaleFilter());
-        filters.add(new GPUImage3x3TextureSamplingFilter(SOBEL_EDGE_DETECTION));
-        return filters;
-    }
-
-    public void setLineSize(final float size) {
-        ((GPUImage3x3TextureSamplingFilter) getFilters().get(1)).setLineSize(size);
+    public GPUImageDirectionalSobelEdgeDetectionFilter() {
+        super(DIRECTIONAL_SOBEL_EDGE_DETECTION_FRAGMENT_SHADER);
     }
 }
