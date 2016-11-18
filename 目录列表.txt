@@ -1,0 +1,255 @@
+文件夹 PATH 列表
+卷序列号为 0061006D 3CD2:D088
+C:.
+│  .gitignore
+│  javaapk.com文件列表生成工具.bat
+│  JavaApk源码说明.txt
+│  pom.xml
+│  README.md
+│  release.sh
+│  VERSION
+│  目录列表.txt
+│  
+├─library
+│  │  .classpath
+│  │  .gitignore
+│  │  .project
+│  │  AndroidManifest.xml
+│  │  pom.xml
+│  │  proguard-project.txt
+│  │  project.properties
+│  │  
+│  ├─.settings
+│  │      org.eclipse.jdt.core.prefs
+│  │      
+│  ├─assets
+│  ├─bin
+│  │  │  AndroidManifest.xml
+│  │  │  gpuimage.jar
+│  │  │  
+│  │  ├─classes
+│  │  │                              
+│  │  └─res
+│  ├─gen
+│  │  └─jp
+│  │      └─co
+│  │          └─cyberagent
+│  │              └─android
+│  │                  └─gpuimage
+│  │                          BuildConfig.java
+│  │                          
+│  ├─jni
+│  │      Android.mk
+│  │      Application.mk
+│  │      yuv-decoder.c
+│  │      
+│  ├─libs
+│  │  ├─armeabi
+│  │  │      libgpuimage-library.so
+│  │  │      
+│  │  └─x86
+│  │          libgpuimage-library.so
+│  │          
+│  ├─res
+│  │  ├─drawable-hdpi
+│  │  ├─drawable-ldpi
+│  │  ├─drawable-mdpi
+│  │  ├─drawable-xhdpi
+│  │  ├─layout
+│  │  └─values
+│  │          strings.xml
+│  │          
+│  └─src
+│      └─jp
+│          └─co
+│              └─cyberagent
+│                  └─android
+│                      └─gpuimage
+│                          │  GPUImage.java
+│                          │  GPUImage3x3ConvolutionFilter.java
+│                          │  GPUImage3x3TextureSamplingFilter.java
+│                          │  GPUImageAddBlendFilter.java
+│                          │  GPUImageAlphaBlendFilter.java
+│                          │  GPUImageBrightnessFilter.java
+│                          │  GPUImageChromaKeyBlendFilter.java
+│                          │  GPUImageColorBlendFilter.java
+│                          │  GPUImageColorBurnBlendFilter.java
+│                          │  GPUImageColorDodgeBlendFilter.java
+│                          │  GPUImageColorInvertFilter.java
+│                          │  GPUImageColorMatrixFilter.java
+│                          │  GPUImageContrastFilter.java
+│                          │  GPUImageDarkenBlendFilter.java
+│                          │  GPUImageDifferenceBlendFilter.java
+│                          │  GPUImageDirectionalSobelEdgeDetectionFilter.java
+│                          │  GPUImageDissolveBlendFilter.java
+│                          │  GPUImageDivideBlendFilter.java
+│                          │  GPUImageEmbossFilter.java
+│                          │  GPUImageExclusionBlendFilter.java
+│                          │  GPUImageExposureFilter.java
+│                          │  GPUImageFilter.java
+│                          │  GPUImageFilterGroup.java
+│                          │  GPUImageGammaFilter.java
+│                          │  GPUImageGrayscaleFilter.java
+│                          │  GPUImageHardLightBlendFilter.java
+│                          │  GPUImageHighlightShadowFilter.java
+│                          │  GPUImageHueBlendFilter.java
+│                          │  GPUImageHueFilter.java
+│                          │  GPUImageLightenBlendFilter.java
+│                          │  GPUImageLinearBurnBlendFilter.java
+│                          │  GPUImageLookupFilter.java
+│                          │  GPUImageLuminosityBlendFilter.java
+│                          │  GPUImageMixBlendFilter.java
+│                          │  GPUImageMonochromeFilter.java
+│                          │  GPUImageMultiplyBlendFilter.java
+│                          │  GPUImageNativeLibrary.java
+│                          │  GPUImageNormalBlendFilter.java
+│                          │  GPUImageOpacityFilter.java
+│                          │  GPUImageOverlayBlendFilter.java
+│                          │  GPUImagePixelationFilter.java
+│                          │  GPUImagePosterizeFilter.java
+│                          │  GPUImageRenderer.java
+│                          │  GPUImageRGBFilter.java
+│                          │  GPUImageSaturationBlendFilter.java
+│                          │  GPUImageSaturationFilter.java
+│                          │  GPUImageScreenBlendFilter.java
+│                          │  GPUImageSepiaFilter.java
+│                          │  GPUImageSharpenFilter.java
+│                          │  GPUImageSobelEdgeDetection.java
+│                          │  GPUImageSoftLightBlendFilter.java
+│                          │  GPUImageSourceOverBlendFilter.java
+│                          │  GPUImageSubtractBlendFilter.java
+│                          │  GPUImageToneCurveFilter.java
+│                          │  GPUImageTwoInputFilter.java
+│                          │  GPUImageView.java
+│                          │  GPUImageVignetteFilter.java
+│                          │  GPUImageWhiteBalanceFilter.java
+│                          │  OpenGlUtils.java
+│                          │  PixelBuffer.java
+│                          │  Rotation.java
+│                          │  
+│                          └─util
+│                                  TextureRotationUtil.java
+│                                  
+├─sample
+│  │  .classpath
+│  │  .gitignore
+│  │  .project
+│  │  AndroidManifest.xml
+│  │  ic_launcher-web.png
+│  │  pom.xml
+│  │  proguard-project.txt
+│  │  project.properties
+│  │  
+│  ├─.settings
+│  │      org.eclipse.jdt.core.prefs
+│  │      
+│  ├─assets
+│  ├─bin
+│  │  │  AndroidManifest.xml
+│  │  │  classes.dex
+│  │  │  gpuimage-sample.apk
+│  │  │  jarlist.cache
+│  │  │  proguard.txt
+│  │  │  R.txt
+│  │  │  resources.ap_
+│  │  │  
+│  │  ├─classes
+│  │  │                                  
+│  │  ├─dexedLibs
+│  │  │      android-support-v4-eb85db9ba9d3169978e8302ce88f4f19.jar
+│  │  │      gpuimage-5ce0e121b0b182875b71f6d0e721ba2f.jar
+│  │  │      
+│  │  └─res
+│  │      └─crunch
+│  │          ├─drawable-hdpi
+│  │          │      ic_action_search.png
+│  │          │      ic_launcher.png
+│  │          │      ic_switch_camera.png
+│  │          │      
+│  │          ├─drawable-ldpi
+│  │          │      ic_launcher.png
+│  │          │      
+│  │          ├─drawable-mdpi
+│  │          │      ic_action_search.png
+│  │          │      ic_launcher.png
+│  │          │      
+│  │          ├─drawable-nodpi
+│  │          │      lookup_amatorka.png
+│  │          │      
+│  │          └─drawable-xhdpi
+│  │                  ic_action_search.png
+│  │                  ic_launcher.png
+│  │                  
+│  ├─gen
+│  │  └─jp
+│  │      └─co
+│  │          └─cyberagent
+│  │              └─android
+│  │                  └─gpuimage
+│  │                      └─sample
+│  │                              BuildConfig.java
+│  │                              R.java
+│  │                              
+│  ├─libs
+│  │      android-support-v4.jar
+│  │      
+│  ├─res
+│  │  ├─drawable-hdpi
+│  │  │      ic_action_search.png
+│  │  │      ic_launcher.png
+│  │  │      ic_switch_camera.png
+│  │  │      
+│  │  ├─drawable-ldpi
+│  │  │      ic_launcher.png
+│  │  │      
+│  │  ├─drawable-mdpi
+│  │  │      ic_action_search.png
+│  │  │      ic_launcher.png
+│  │  │      
+│  │  ├─drawable-nodpi
+│  │  │      lookup_amatorka.png
+│  │  │      
+│  │  ├─drawable-xhdpi
+│  │  │      ic_action_search.png
+│  │  │      ic_launcher.png
+│  │  │      
+│  │  ├─layout
+│  │  │      activity_camera.xml
+│  │  │      activity_gallery.xml
+│  │  │      activity_main.xml
+│  │  │      
+│  │  ├─raw
+│  │  │      tone_cuver_sample.acv
+│  │  │      
+│  │  ├─values
+│  │  │      strings.xml
+│  │  │      styles.xml
+│  │  │      
+│  │  ├─values-v11
+│  │  │      styles.xml
+│  │  │      
+│  │  └─values-v14
+│  │          styles.xml
+│  │          
+│  └─src
+│      └─jp
+│          └─co
+│              └─cyberagent
+│                  └─android
+│                      └─gpuimage
+│                          └─sample
+│                              │  GPUImageFilterTools.java
+│                              │  
+│                              ├─activity
+│                              │      ActivityCamera.java
+│                              │      ActivityGallery.java
+│                              │      ActivityMain.java
+│                              │      
+│                              └─utils
+│                                      CameraHelper.java
+│                                      CameraHelperBase.java
+│                                      CameraHelperGB.java
+│                                      
+└─utils
+        Shader2String.py
+        
