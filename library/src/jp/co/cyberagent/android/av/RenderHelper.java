@@ -63,7 +63,11 @@ public class RenderHelper extends Thread {
         private long mPrevTimeNanos;
 
         // Used for off-screen rendering.
-        public FullFrameRect mFullScreen;
+        private int mOffscreenTexture;
+        private int mFramebuffer;
+        private int mDepthBuffer;
+        private FullFrameRect mFullScreen;
+        
         // Used for recording.
         private File mOutputFile;
         public WindowSurface mInputWindowSurface;

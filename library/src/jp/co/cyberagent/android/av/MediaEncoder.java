@@ -180,7 +180,7 @@ public abstract class MediaEncoder implements Runnable {
    /*package*/ abstract void prepare() throws IOException;
 
 	/*package*/ void startRecording() {
-   	if (DEBUG) Log.v(TAG, "start audio Recording");
+   	if (DEBUG) Log.v(TAG, "startRecording");
 		synchronized (mSync) {
 			mIsCapturing = true;
 			mRequestStop = false;

@@ -103,7 +103,7 @@ public class GPUImageRenderer implements Renderer, PreviewCallback {
 
     public void setRenderHelper() {
     	if (mWidth != -1 && mHeight != -1 && mRenderHelper == null) {
-    		RenderHelper renderHelper = new RenderHelper(null, new File("/sdcard/a.h264"), 1);
+    		RenderHelper renderHelper = new RenderHelper(null, new File("/sdcard/output.mp4"), 1);
     		renderHelper.startEncoder(mWidth, mHeight);
     		
     		mRenderHelper = renderHelper;
@@ -168,12 +168,13 @@ public class GPUImageRenderer implements Renderer, PreviewCallback {
                 mRunOnDraw.poll().run();
             }
         }
-        mFilter.onDraw(mGLTextureId, mGLCubeBuffer, mGLTextureBuffer);
+
         if (mSurfaceTexture != null) {
             mSurfaceTexture.updateTexImage();
             
-            mVideoDump.DumpToFile();
+            //mVideoDump.DumpToFile();
         }
+        mFilter.onDraw(mGLTextureId, mGLCubeBuffer, mGLTextureBuffer);
         view.eglSwap();
 
         if (mRenderHelper != null) {

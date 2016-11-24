@@ -39,7 +39,7 @@ import java.nio.ByteBuffer;
  */
 public class VideoEncoderCore {
     private static final String TAG = "VideoEncoderCore";
-    private static final boolean VERBOSE = false;
+    private static final boolean VERBOSE = true;
 
     // TODO: these ought to be configurable as well
     private static final String MIME_TYPE = "video/avc";    // H.264 Advanced Video Coding
@@ -146,6 +146,8 @@ public class VideoEncoderCore {
         ByteBuffer[] encoderOutputBuffers = mEncoder.getOutputBuffers();
         while (true) {
             int encoderStatus = mEncoder.dequeueOutputBuffer(mBufferInfo, TIMEOUT_USEC);
+            
+            Log.d(TAG, "sending EOS to encoder encoderStatus=" + encoderStatus);
             if (encoderStatus == MediaCodec.INFO_TRY_AGAIN_LATER) {
                 // no output available yet
                 if (!endOfStream) {
@@ -182,7 +184,7 @@ public class VideoEncoderCore {
                 //mMuxer.start();
                 mMuxerStarted = true;
             } else if (encoderStatus < 0) {
-                Log.w(TAG, "unexpected result from encoder.dequeueOutputBuffer: " +
+                Log.d(TAG, "unexpected result from encoder.dequeueOutputBuffer: " +
                         encoderStatus);
                 // let's ignore it
             } else {
@@ -198,7 +200,10 @@ public class VideoEncoderCore {
                     if (VERBOSE) Log.d(TAG, "ignoring BUFFER_FLAG_CODEC_CONFIG");
                     mBufferInfo.size = 0;
                 }
-
+                
+                Log.d(TAG, "sent " + mBufferInfo.size + " bytes to muxer, ts=" +
+                        mBufferInfo.presentationTimeUs);
+                
                 if (mBufferInfo.size != 0) {
                     if (!mMuxerStarted) {
                         throw new RuntimeException("muxer hasn't started");
