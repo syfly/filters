@@ -32,7 +32,7 @@ import javax.microedition.khronos.egl.EGLSurface;
 import javax.microedition.khronos.opengles.GL10;
 
 import android.graphics.Bitmap;
-import android.opengl.GLSurfaceView;
+//import android.opengl.GLSurfaceView;
 import android.util.Log;
 
 public class PixelBuffer {

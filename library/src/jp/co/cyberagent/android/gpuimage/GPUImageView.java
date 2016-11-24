@@ -19,7 +19,7 @@ package jp.co.cyberagent.android.gpuimage;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.Uri;
-import android.opengl.GLSurfaceView;
+//import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
 
 import java.io.File;

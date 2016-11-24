@@ -25,8 +25,10 @@ import android.hardware.Camera;
 import android.hardware.Camera.PreviewCallback;
 import android.hardware.Camera.Size;
 import android.opengl.GLES20;
-import android.opengl.GLSurfaceView.Renderer;
+//import android.opengl.GLSurfaceView.Renderer;
 import android.util.Log;
+import jp.co.cyberagent.android.av.RenderHelper;
+import jp.co.cyberagent.android.gpuimage.GLSurfaceView.Renderer;
 import jp.co.cyberagent.android.gpuimage.filters.GPUImageFilter;
 import jp.co.cyberagent.android.gpuimage.util.TextureRotationUtil;
 import jp.co.cyberagent.android.gpuimage.util.VideoDump;
@@ -34,6 +36,7 @@ import jp.co.cyberagent.android.gpuimage.util.VideoDump;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -78,6 +81,9 @@ public class GPUImageRenderer implements Renderer, PreviewCallback {
     private boolean mFlipVertical;
     private GPUImage.ScaleType mScaleType = GPUImage.ScaleType.CENTER_CROP;
 	private VideoDump mVideoDump;
+	private RenderHelper mRenderHelper = null;
+	private int mWidth = -1;
+	private int mHeight = -1;
 
     public GPUImageRenderer(final GPUImageFilter filter) {
         mFilter = filter;
@@ -95,6 +101,21 @@ public class GPUImageRenderer implements Renderer, PreviewCallback {
         setRotation(Rotation.NORMAL, false, false);
     }
 
+    public void setRenderHelper() {
+    	if (mWidth != -1 && mHeight != -1 && mRenderHelper == null) {
+    		RenderHelper renderHelper = new RenderHelper(null, new File("/sdcard/a.h264"), 1);
+    		renderHelper.startEncoder(mWidth, mHeight);
+    		
+    		mRenderHelper = renderHelper;
+    	}
+    }
+    
+    public void closeRenderHelper() {
+    	if (mRenderHelper != null) {
+    		mRenderHelper.stopEncoder();
+    	}
+    }
+    
     @Override
     public void onSurfaceCreated(final GL10 unused, final EGLConfig config) {
         GLES20.glClearColor(0, 0, 0, 1);
@@ -109,7 +130,8 @@ public class GPUImageRenderer implements Renderer, PreviewCallback {
         GLES20.glViewport(0, 0, width, height);
         
         mVideoDump.init(width, height);
-        
+        mWidth = width;
+        mHeight = height;
         GLES20.glUseProgram(mFilter.getProgram());
         mFilter.onOutputSizeChanged(width, height);
         synchronized (mSurfaceChangedWaiter) {
@@ -132,11 +154,51 @@ public class GPUImageRenderer implements Renderer, PreviewCallback {
             
             mVideoDump.DumpToFile();
         }
-        
+
         
         Log.d(TAG, "onDrawFrame end mGLTextureId" + mGLTextureId);
     }
 
+    @Override
+    public void onDrawFrame(GL10 gl, GLSurfaceView view) {
+    	//Log.d(TAG, "onDrawFrame mGLTextureId=" + mGLTextureId);
+        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
+        synchronized (mRunOnDraw) {
+            while (!mRunOnDraw.isEmpty()) {
+                mRunOnDraw.poll().run();
+            }
+        }
+        mFilter.onDraw(mGLTextureId, mGLCubeBuffer, mGLTextureBuffer);
+        if (mSurfaceTexture != null) {
+            mSurfaceTexture.updateTexImage();
+            
+            mVideoDump.DumpToFile();
+        }
+        view.eglSwap();
+
+        if (mRenderHelper != null) {
+        	// Blit to encoder.
+            mRenderHelper.mVideoEncoder.frameAvailableSoon();
+            mRenderHelper.mInputWindowSurface.makeCurrent();
+            GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);    // again, only really need to
+            GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);     //  clear pixels outside rect
+            GLES20.glViewport(mRenderHelper.mVideoRect.left, mRenderHelper.mVideoRect.top,
+            		mRenderHelper.mVideoRect.width(), mRenderHelper.mVideoRect.height());
+            //mRenderHelper.mFullScreen.drawFrame(mOffscreenTexture, mIdentityMatrix);
+            mFilter.onDraw(mGLTextureId, mGLCubeBuffer, mGLTextureBuffer);
+            mRenderHelper.mInputWindowSurface.setPresentationTime(0);
+            mRenderHelper.mInputWindowSurface.swapBuffers();
+
+            // Restore previous values.
+            GLES20.glViewport(0, 0, -1, -1);
+            
+            
+            view.eglMakeCurrent();
+        }
+     
+        Log.d(TAG, "onDrawFrame end mGLTextureId" + mGLTextureId);
+    };
+    
     @Override
     public void onPreviewFrame(final byte[] data, final Camera camera) {
     	Log.d(TAG, "onPreviewFrame mGLTextureId=" + mGLTextureId);

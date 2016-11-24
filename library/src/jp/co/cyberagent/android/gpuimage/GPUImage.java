@@ -29,7 +29,7 @@ import android.hardware.Camera;
 import android.media.ExifInterface;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
-import android.opengl.GLSurfaceView;
+//import android.opengl.GLSurfaceView;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Environment;
@@ -100,6 +100,13 @@ public class GPUImage {
         mGlSurfaceView.requestRender();
     }
 
+    public void setRenderHelp() {
+    	mRenderer.setRenderHelper();
+    }
+    
+    public void closeRenderHelp() {
+    	mRenderer.closeRenderHelper();
+    }
     /**
      * Request the preview to be rendered again.
      */

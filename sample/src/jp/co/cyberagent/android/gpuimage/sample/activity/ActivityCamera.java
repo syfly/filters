@@ -39,7 +39,8 @@ import android.hardware.Camera;
 import android.hardware.Camera.CameraInfo;
 import android.hardware.Camera.Parameters;
 import android.net.Uri;
-import android.opengl.GLSurfaceView;
+//import android.opengl.GLSurfaceView;
+import jp.co.cyberagent.android.gpuimage.*;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
@@ -89,7 +90,15 @@ public class ActivityCamera extends Activity implements OnSeekBarChangeListener,
         mCamera.onPause();
         super.onPause();
     }
-
+    
+    @Override
+    protected void onDestroy() {
+    	// TODO Auto-generated method stub
+    	super.onDestroy();
+    	
+    	mGPUImage.closeRenderHelp();
+    }
+    
     @Override
     public void onClick(final View v) {
         switch (v.getId()) {
@@ -104,6 +113,7 @@ public class ActivityCamera extends Activity implements OnSeekBarChangeListener,
                 break;
 
             case R.id.button_capture:
+            	mGPUImage.setRenderHelp();
                 if (mCamera.mCameraInstance.getParameters().getFocusMode().equals(
                         Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
                     takePicture();
