@@ -24,6 +24,7 @@ import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.hardware.Camera.PreviewCallback;
 import android.hardware.Camera.Size;
+import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
 //import android.opengl.GLSurfaceView.Renderer;
 import android.util.Log;
@@ -35,6 +36,8 @@ import jp.co.cyberagent.android.gpuimage.util.VideoDump;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
+
+import com.android.grafika.gles.GlUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -84,6 +87,7 @@ public class GPUImageRenderer implements Renderer, PreviewCallback {
 	private RenderHelper mRenderHelper = null;
 	private int mWidth = -1;
 	private int mHeight = -1;
+	private boolean mFrameAvailable;
 
     public GPUImageRenderer(final GPUImageFilter filter) {
         mFilter = filter;
@@ -99,15 +103,16 @@ public class GPUImageRenderer implements Renderer, PreviewCallback {
                 .asFloatBuffer();
         mVideoDump = new VideoDump();
         setRotation(Rotation.NORMAL, false, false);
+        
+        mRenderHelper = new RenderHelper(null, new File("/sdcard/output.mp4"), 1);
     }
 
     public void setRenderHelper() {
-    	if (mWidth != -1 && mHeight != -1 && mRenderHelper == null) {
-    		RenderHelper renderHelper = new RenderHelper(null, new File("/sdcard/output.mp4"), 1);
-    		renderHelper.startEncoder(mWidth, mHeight);
-    		
-    		mRenderHelper = renderHelper;
-    	}
+    	mRenderHelper.startEncoder(mWidth, mHeight);
+//    	if (mRenderHelper == null) {
+//    		mRenderHelper = new RenderHelper(null, new File("/sdcard/output.mp4"), 1);
+//    		//renderHelper.startEncoder(mWidth, mHeight);
+//    	}
     }
     
     public void closeRenderHelper() {
@@ -121,6 +126,10 @@ public class GPUImageRenderer implements Renderer, PreviewCallback {
         GLES20.glClearColor(0, 0, 0, 1);
         GLES20.glDisable(GLES20.GL_DEPTH_TEST);
         mFilter.init();
+        
+        if (mRenderHelper != null) {
+        	mRenderHelper.surfaceCreated();
+        }
     }
 
     @Override
@@ -134,6 +143,13 @@ public class GPUImageRenderer implements Renderer, PreviewCallback {
         mHeight = height;
         GLES20.glUseProgram(mFilter.getProgram());
         mFilter.onOutputSizeChanged(width, height);
+        
+        if (mRenderHelper != null) {
+        	Log.d(TAG, "onDrawFrame surfaceChanged");
+        	//mRenderHelper.startEncoder(width, height);
+        	mRenderHelper.surfaceChanged(width, height);
+        }
+        
         synchronized (mSurfaceChangedWaiter) {
             mSurfaceChangedWaiter.notifyAll();
         }
@@ -161,7 +177,6 @@ public class GPUImageRenderer implements Renderer, PreviewCallback {
 
     @Override
     public void onDrawFrame(GL10 gl, GLSurfaceView view) {
-    	//Log.d(TAG, "onDrawFrame mGLTextureId=" + mGLTextureId);
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
         synchronized (mRunOnDraw) {
             while (!mRunOnDraw.isEmpty()) {
@@ -169,73 +184,105 @@ public class GPUImageRenderer implements Renderer, PreviewCallback {
             }
         }
 
-        if (mSurfaceTexture != null) {
-            mSurfaceTexture.updateTexImage();
-            
-            //mVideoDump.DumpToFile();
-        }
-        mFilter.onDraw(mGLTextureId, mGLCubeBuffer, mGLTextureBuffer);
-        view.eglSwap();
-
+        
+        
+//        if (mFrameAvailable) {
+//        	if (mSurfaceTexture != null) {
+//                mSurfaceTexture.updateTexImage();
+//                
+//                //mVideoDump.DumpToFile();
+//            }
+//        	mFrameAvailable = false;
+//        }
+        mSurfaceTexture.updateTexImage();
+//        float[] mtx = new float[16];
+//        mSurfaceTexture.getTransformMatrix(mtx);
+//        mFilter.onDrawEx(mGLTextureId, mGLCubeBuffer, mGLTextureBuffer);
+//        view.eglSwap();
         if (mRenderHelper != null) {
-        	// Blit to encoder.
-            mRenderHelper.mVideoEncoder.frameAvailableSoon();
-            mRenderHelper.mInputWindowSurface.makeCurrent();
-            GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);    // again, only really need to
-            GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);     //  clear pixels outside rect
-            GLES20.glViewport(mRenderHelper.mVideoRect.left, mRenderHelper.mVideoRect.top,
-            		mRenderHelper.mVideoRect.width(), mRenderHelper.mVideoRect.height());
-            //mRenderHelper.mFullScreen.drawFrame(mOffscreenTexture, mIdentityMatrix);
-            mFilter.onDraw(mGLTextureId, mGLCubeBuffer, mGLTextureBuffer);
-            mRenderHelper.mInputWindowSurface.setPresentationTime(0);
-            mRenderHelper.mInputWindowSurface.swapBuffers();
+	        GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, mRenderHelper.mFramebuffer);
+	        mRenderHelper.draw();
+	        GlUtil.checkGlError("glBindFramebuffer");
+	        GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
+	        
+	        mRenderHelper.mFullScreen.drawFrame(mRenderHelper.mOffscreenTexture, mRenderHelper.mIdentityMatrix);
+	        //mFilter.onDraw(mRenderHelper.mOffscreenTexture, mGLCubeBuffer, mGLTextureBuffer);
+	        view.eglSwap();
 
-            // Restore previous values.
-            GLES20.glViewport(0, 0, -1, -1);
-            
-            
-            view.eglMakeCurrent();
+	        
+	        // Blit to encoder.
+	        if (mRenderHelper.mVideoEncoder != null) {
+	        	 mRenderHelper.mVideoEncoder.frameAvailableSoon();
+	             mRenderHelper.mInputWindowSurface.makeCurrent();
+	             GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);    // again, only really need to
+	             GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);     //  clear pixels outside rect
+	             GLES20.glViewport(mRenderHelper.mVideoRect.left, mRenderHelper.mVideoRect.top,
+	             		mRenderHelper.mVideoRect.width(), mRenderHelper.mVideoRect.height());
+	             //mRenderHelper.mFullScreen.drawFrame(mOffscreenTexture, mIdentityMatrix);
+	             mFilter.onDraw(mRenderHelper.mOffscreenTexture, mGLCubeBuffer, mGLTextureBuffer);
+	             mRenderHelper.mInputWindowSurface.setPresentationTime(0);
+	             mRenderHelper.mInputWindowSurface.swapBuffers();
+
+	             // Restore previous values.
+	             GLES20.glViewport(0, 0, -1, -1);
+	             
+	             
+	             view.eglMakeCurrent();
+	        }
+	        
+	        Log.d(TAG, "onDrawFrame end mGLTextureId" + mRenderHelper.mOffscreenTexture);
         }
      
-        Log.d(TAG, "onDrawFrame end mGLTextureId" + mGLTextureId);
+        
     };
     
     @Override
     public void onPreviewFrame(final byte[] data, final Camera camera) {
-    	Log.d(TAG, "onPreviewFrame mGLTextureId=" + mGLTextureId);
+    	//Log.d(TAG, "onPreviewFrame mGLTextureId=" + mGLTextureId);
     	
-        final Size previewSize = camera.getParameters().getPreviewSize();
-        if (mGLRgbBuffer == null) {
-            mGLRgbBuffer = IntBuffer.allocate(previewSize.width * previewSize.height);
-        }
-        if (mRunOnDraw.isEmpty()) {
-            runOnDraw(new Runnable() {
-                @Override
-                public void run() {
-                	Log.d(TAG, "onPreviewFrame Run mGLTextureId=" + mGLTextureId);
-                    GPUImageNativeLibrary.YUVtoRBGA(data, previewSize.width, previewSize.height,
-                            mGLRgbBuffer.array());
-                    mGLTextureId = OpenGlUtils.loadTexture(mGLRgbBuffer, previewSize, mGLTextureId);
-                    camera.addCallbackBuffer(data);
-
-                    if (mImageWidth != previewSize.width) {
-                        mImageWidth = previewSize.width;
-                        mImageHeight = previewSize.height;
-                        adjustImageScaling();
-                    }
-                }
-            });
-        }
+//        final Size previewSize = camera.getParameters().getPreviewSize();
+//        if (mGLRgbBuffer == null) {
+//            mGLRgbBuffer = IntBuffer.allocate(previewSize.width * previewSize.height);
+//        }
+//        if (mRunOnDraw.isEmpty()) {
+//            runOnDraw(new Runnable() {
+//                @Override
+//                public void run() {
+//                	Log.d(TAG, "onPreviewFrame Run mGLTextureId=" + mGLTextureId);
+//                    GPUImageNativeLibrary.YUVtoRBGA(data, previewSize.width, previewSize.height,
+//                            mGLRgbBuffer.array());
+//                    mGLTextureId = OpenGlUtils.loadTexture(mGLRgbBuffer, previewSize, mGLTextureId);
+//                    camera.addCallbackBuffer(data);
+//
+//                    if (mImageWidth != previewSize.width) {
+//                        mImageWidth = previewSize.width;
+//                        mImageHeight = previewSize.height;
+//                        adjustImageScaling();
+//                    }
+//                }
+//            });
+//        }
     }
-
+    
     public void setUpSurfaceTexture(final Camera camera) {
         runOnDraw(new Runnable() {
             @Override
             public void run() {
             	Log.d(TAG, "setUpSurfaceTexture Run");
-                int[] textures = new int[1];
-                GLES20.glGenTextures(1, textures, 0);
-                mSurfaceTexture = new SurfaceTexture(textures[0]);
+                //int[] textures = new int[1];
+            	mGLTextureId = mRenderHelper.getsurfaceTex();
+                //GLES20.glGenTextures(1, mGLTextureId, 0);
+                mSurfaceTexture = new SurfaceTexture(mGLTextureId);
+                mSurfaceTexture.setOnFrameAvailableListener(new SurfaceTexture.OnFrameAvailableListener() {
+					
+					@Override
+					public void onFrameAvailable(SurfaceTexture surfaceTexture) {
+						// TODO Auto-generated method stub
+						mFrameAvailable = true;
+						
+						Log.d(TAG, "setUpSurfaceTexture Run frameAvailable");
+					}
+				});
                 try {
                     camera.setPreviewTexture(mSurfaceTexture);
                     camera.setPreviewCallback(GPUImageRenderer.this);
